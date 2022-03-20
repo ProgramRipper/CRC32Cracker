@@ -57,8 +57,7 @@ class crc32Cracker:
         i = 0
         while True:
             i += 1
-            low = self.check(i, indexes)
-            if low:
+            if low := self.check(i, indexes):
                 return int(str(i) + low)
 
     def __call__(self, crc):
