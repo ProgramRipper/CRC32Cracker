@@ -46,7 +46,7 @@ def check(high: int, indexes: list) -> int | None:
 
 def main(crc: str | int) -> int:  # type: ignore
     indexes = [0] * 4
-    crc = (crc if isinstance(crc, int) else int(crc, 16)) ^ 0xFFFFFFFF
+    crc: int = (crc if isinstance(crc, int) else int(crc, 16)) ^ 0xFFFFFFFF
     for i in range(1, 1000):
         if crc == crc32(str(i))[0]:
             return i
