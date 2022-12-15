@@ -4,6 +4,7 @@ from typing import Literal
 POLY: Literal[0xEDB88320] = 0xEDB88320
 
 table: list[int] = []
+last_index: list[int] = [0] * 256
 
 for i in range(256):
     value = i
@@ -13,6 +14,7 @@ for i in range(256):
         else:
             value >>= 1
     table.append(value)
+    last_index[value >> 24] = i
 
 
 def crc32(string: str) -> tuple[int, int]:
@@ -22,12 +24,6 @@ def crc32(string: str) -> tuple[int, int]:
         index = (crc ^ ord(i)) & 0xFF
         crc = crc >> 8 ^ table[index]
     return crc, index
-
-
-def last_index(crc: int) -> int:  # type: ignore
-    for index, value in enumerate(table):
-        if crc == value >> 24:
-            return index
 
 
 def check(high: int, indexes: list) -> int | None:
@@ -51,7 +47,7 @@ def main(crc: str | int) -> int:  # type: ignore
         if crc == crc32(str(i))[0]:
             return i
     for i in range(3, -1, -1):
-        index = indexes[3 - i] = last_index(crc >> (i << 3))
+        index = indexes[3 - i] = last_index[crc >> (i << 3)]
         crc ^= table[index] >> ((3 - i) << 3)
     for i in count(1):
         if result := check(i, indexes):
