@@ -134,9 +134,9 @@ int main(int args, char *argv[]) {
   uint32_t crc;
 
   if (args > 1) {
-    sscanf(argv[1], "%u", &crc);
+    sscanf(argv[1], "%8x", &crc);
   } else {
-    if (scanf("%u", &crc) != 1) {
+    if (scanf("%8x", &crc) != 1) {
       return -1;
     };
   }
