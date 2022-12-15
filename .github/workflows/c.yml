@@ -1,0 +1,70 @@
+name: C
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Rename
+        run: >
+          mv
+          ${{ github.workspace }}/build/${{ matrix.os == 'windows-latest' && format('{0}/crack.exe', env.BUILD_TYPE) || 'crack' }}
+          ${{ github.workspace }}/build/${{ matrix.os }}-crack${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}-artifact
+          path: ${{ github.workspace }}/build/${{ matrix.os }}-crack${{ matrix.os == 'windows-latest' && '.exe' || '' }}
+
+  release:
+    if: github.event_name == 'push'
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          path: ${{ github.workspace }}/build
+
+      - name: Tag
+        id: tag
+        run: |
+          tag=$(git log -n1 --format="%h")
+          git config --local user.email "programripper@foxmail.com"
+          git config --local user.name "ProgramRipper"
+          git tag -a $tag -m $tag
+          git push --tags
+          echo tag=$tag >> $GITHUB_OUTPUT
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          files: ${{ github.workspace }}/build/*-artifact/*
