@@ -5,10 +5,14 @@
 ## 使用
 
 ```shell
+# Python
 python main.py [crc32hash]
 
-gcc -O3 -o main main.c -lm
-./main [crc32hash]
+# C
+mkdir build
+cmake ..
+make
+./crack [crc32hash]
 ```
 
 ## 鸣谢
