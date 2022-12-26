@@ -10,6 +10,7 @@ python main.py [crc32hash]
 
 # C
 mkdir build
+cd build
 cmake ..
 make
 ./crack [crc32hash]
